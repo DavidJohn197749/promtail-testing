@@ -1,0 +1,41 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 45.9.1
+    helm:
+      releaseName: prometheus-stack
+      valueFiles:
+        - prometheus.values.yml
+      # values: |
+      #   grafana:
+      #     ingress:
+      #       enabled: true
+      #       ingressClassName: nginx
+      #       annotations:
+      #         cert-manager.io/cluster-issuer: letsencrypt-staging
+      #         kubernetes.io/tls-acme: "true"
+      #       hosts:
+      #         - grafana.aks.iqax.airbox197749.com
+      #       tls:
+      #       - secretName: grafana-2-tls
+      #         hosts:
+      #         - grafana.aks.iqax.airbox197749.com
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - Validate=false
+      - CreateNamespace=true
+      - ServerSideApply=true
